@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kazi Safi - Employee Dashboard</title>
+    <link rel="stylesheet" href="user.css">
+</head>
+<body>
+
+<div class="dashboard-wrapper">
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h3>Kazi Safi</h3>
+            <p>Work-Pay System</p>
+        </div>
+
+        <nav class="menu">
+    <a href="user.html" class="nav-item active">Dashboard</a>
+    <a href="userattendance.html" class="nav-item">Mark Attendance</a>
+    <a href="userearning.html" class="nav-item">My Earnings</a>
+    <a href="userwithdraw.html" class="nav-item">Withdraw</a>
+    <a href="contactadmin.html" class="nav-item">Contact Admin</a>
+</nav>
+
+        <div class="sidebar-footer">
+            <strong>Jane Wanjiku</strong>
+            <span>Employee</span>
+            <button id="logoutBtn">Log out</button>
+        </div>
+    </aside>
+
+    <main class="content-area">
+
+        <header class="main-header">
+            <h1>Dashboard</h1>
+            <p>Welcome back, Jane!</p>
+        </header>
+
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Days Worked</div>
+                <div class="stat-value">3</div>
+                <div class="stat-sub">Approved days</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Daily Rate</div>
+                <div class="stat-value">KES 1,500</div>
+                <div class="stat-sub">Per day</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Total Earned</div>
+                <div class="stat-value">KES 4,500</div>
+                <div class="stat-sub">All time</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Balance</div>
+                <div class="stat-value">KES 2,500</div>
+                <div class="stat-sub">Available</div>
+            </div>
+        </section>
+
+        <section class="details-grid">
+            <div class="data-box">
+                <h3>Recent Attendance</h3>
+                <p>Feb 20 - Present</p>
+                <p>Feb 19 - Present</p>
+                <p>Feb 18 - Present</p>
+            </div>
+
+            <div class="data-box">
+                <h3>Recent Withdrawals</h3>
+                <p>KES 1,000 - Feb 15</p>
+                <p>KES 1,000 - Feb 10</p>
+            </div>
+        </section>
+
+    </main>
+
+</div>
+
+<script src="user.js"></script>
+</body>
+</html>
