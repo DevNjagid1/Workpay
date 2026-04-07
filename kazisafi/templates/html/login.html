@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Kazi Safi</title>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+    <div class="auth-container">
+        <header>
+            <div class="logo-box">
+                <svg viewBox="0 0 24 24" width="30" height="30" fill="white">
+                    <path d="M12 2L14.5 9H22L16 14L18.5 21L12 17L5.5 21L8 14L2 9H9.5L12 2Z" />
+                </svg>
+            </div>
+            <h1>Kazi Safi</h1>
+            <p class="subtitle">Work-Pay Management System</p>
+        </header>
+
+        <main class="auth-card">
+            <h2>Welcome back</h2>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <form method="POST" action="{% url 'login' %}" id="loginForm">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="error-list">
+                        {% for error in form.non_field_errors %}
+                            <div class="error-item">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}">Username or Employee ID</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <div class="error-message">
+                            {% for error in form.username.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.password.id_for_label }}">Password</label>
+                    <div style="position: relative;">
+                        {{ form.password }}
+                    </div>
+                    {% if form.password.errors %}
+                        <div class="error-message">
+                            {% for error in form.password.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="forgot-link">
+                        <a href="{% url 'password_reset' %}" id="forgotPasswordLink">Forgot Password?</a>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-btn" id="loginBtn">Sign in</button>
+            </form>
+            
+            <div class="toggle-view">
+                <p>No account? <a href="{% url 'register' %}">Register here</a></p>
+            </div>
+        </main>
+    </div>
+    <script src="{% static 'js/login.js' %}"></script>
+</body>
+</html>

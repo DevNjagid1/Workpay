@@ -1,0 +1,123 @@
+{% extends "html/base.html" %}
+{% load static %}
+
+{% block title %}Kazi Safi - Employee Directory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/employees.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="content-area">
+    <header class="section-header">
+        <div class="header-left">
+            <h1>Employee Directory</h1>
+            <p>Manage employee accounts and access</p>
+        </div>
+        <button id="openModalBtn" class="add-emp-btn">+ Add Employee</button>
+    </header>
+
+    <div class="search-container">
+        <div class="search-box">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="employeeSearch" placeholder="Search by name, ID, or email...">
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table id="employeeTable">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Daily Rate</th>
+                    <th>Start Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for employee in employees %}
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <span class="avatar">{{ employee.name|slice:":2"|upper }}</span>
+                            <span>{{ employee.name }}</span>
+                        </div>
+                    </td>
+                    <td>{{ employee.employee_id }}</td>
+                    <td>{{ employee.email }}</td>
+                    <td>{{ employee.phone }}</td>
+                    <td>KES {{ employee.daily_rate|floatformat:0 }}</td>
+                    <td>{{ employee.start_date|date:"M d, Y" }}</td>
+                    <td>
+                        <span class="badge {{ employee.status|lower }}">
+                            {{ employee.status|title }}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="toggle-status-btn" onclick="toggleEmployeeStatus({{ employee.id }})">
+                            {% if employee.status == 'active' %}Disable{% else %}Enable{% endif %}
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 2rem;">
+                        No employees found. Add your first employee!
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</main>
+{% endblock %}
+
+<div id="employeeModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add New Employee</h2>
+            <span id="closeModal" class="close">&times;</span>
+        </div>
+        <form id="addEmployeeForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="newName" required>
+                </div>
+                <div class="form-group">
+                    <label>Employee ID</label>
+                    <input type="text" id="newId" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="newEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" id="newPhone" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Daily Rate (KES)</label>
+                    <input type="number" id="newRate" required>
+                </div>
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" id="newDate" required>
+                </div>
+            </div>
+            <button type="submit" class="submit-btn">Save Employee</button>
+        </form>
+    </div>
+</div>
+{% block extra_js %}
+<script src="{% static 'js/logout.js' %}"></script>
+<script src="{% static 'js/employees.js' %}"></script>
+{% endblock %}

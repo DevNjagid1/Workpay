@@ -1,0 +1,74 @@
+{% extends "html/user-base.html" %}
+{% load static %}
+
+{% block title %}Kazi Safi - User Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/user.css' %}">
+{% endblock %}
+
+{% block content %}
+
+    <main class="content-area">
+
+        <header class="main-header">
+            <h1>Dashboard</h1>
+            <p>Welcome back, {{ user.get_full_name|default:user.username }}!</p>
+        </header>
+
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Days Worked</div>
+                <div class="stat-value">{{ days_worked|default:0 }}</div>
+                <div class="stat-sub">Approved days</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Daily Rate</div>
+                <div class="stat-value">KES {{ daily_rate|default:0|floatformat:0 }}</div>
+                <div class="stat-sub">Per day</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Total Earned</div>
+                <div class="stat-value">KES {{ total_earned|default:0|floatformat:0 }}</div>
+                <div class="stat-sub">All time</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Balance</div>
+                <div class="stat-value">KES {{ balance|default:0|floatformat:0 }}</div>
+                <div class="stat-sub">Available</div>
+            </div>
+        </section>
+
+        <section class="details-grid">
+            <div class="data-box">
+                <h3>Recent Attendance</h3>
+                {% for attendance in recent_attendances %}
+                <p>{{ attendance.date|date:"M d" }} - {{ attendance.status|title }}</p>
+                {% empty %}
+                <p>No recent attendance records</p>
+                {% endfor %}
+            </div>
+
+            <div class="data-box">
+                <h3>Recent Withdrawals</h3>
+                {% for withdrawal in recent_withdrawals %}
+                <p>KES {{ withdrawal.amount|floatformat:0 }} - {{ withdrawal.date|date:"M d" }}</p>
+                {% empty %}
+                <p>No recent withdrawals</p>
+                {% endfor %}
+            </div>
+        </section>
+
+    </main>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/user.js' %}"></script>
+{% endblock %}
+</body>
+</html>

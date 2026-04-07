@@ -1,0 +1,61 @@
+{% extends "html/base.html" %}
+{% load static %}
+
+{% block title %}Kazi Safi - Support Inbox{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/support.css' %}">
+{% endblock %}
+
+{% block content %}
+<header class="section-header">
+    <h1>Support Inbox</h1>
+    <p>Manage employee support tickets and inquiries</p>
+</header>
+
+<div class="filter-actions">
+    <div class="toggle-group">
+        <button class="toggle-btn active" onclick="filterTickets('all')">All</button>
+        <button class="toggle-btn" onclick="filterTickets('open')">Open</button>
+        <button class="toggle-btn" onclick="filterTickets('resolved')">Resolved</button>
+    </div>
+</div>
+
+<div id="ticketContainer" class="ticket-list">
+    {% for ticket in tickets %}
+    <div class="ticket-item {{ ticket.status|lower }}" data-status="{{ ticket.status|lower }}">
+        <div class="ticket-header">
+            <div class="ticket-info">
+                <span class="ticket-id">#{{ ticket.id }}</span>
+                <span class="ticket-subject">{{ ticket.subject }}</span>
+            </div>
+            <span class="ticket-status {{ ticket.status|lower }}">{{ ticket.status|title }}</span>
+        </div>
+        <div class="ticket-meta">
+            <span class="ticket-user">{{ ticket.user.name }}</span>
+            <span class="ticket-date">{{ ticket.created_at|date:"M d, Y H:i" }}</span>
+        </div>
+        <div class="ticket-preview">
+            {{ ticket.message|truncatewords:15 }}
+        </div>
+        <div class="ticket-actions">
+            <button class="btn view-btn" onclick="viewTicket({{ ticket.id }})">View</button>
+            {% if ticket.status == 'open' %}
+            <button class="btn resolve-btn" onclick="resolveTicket({{ ticket.id }})">Resolve</button>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="empty-state">
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#9ca3af" stroke-width="1.5">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <p>No support tickets found.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/support.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% load static %}
+
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/userwithdraw.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 24 24" fill="white" width="24" height="24"><path d="M12 2L14.5 9H22L16 14L18.5 21L12 17L5.5 21L8 14L2 9H9.5L12 2Z"/></svg>
+                </div>
+                <div class="brand-text">
+                    <h3>Kazi Safi</h3>
+                    <p>Work-Pay System</p>
+                </div>
+            </div>
+            <nav class="menu">
+                <a href="{% url 'user_dashboard' %}" class="nav-item">Dashboard</a>
+                <a href="{% url 'user_attendance' %}" class="nav-item">Mark Attendance</a>
+                <a href="{% url 'user_earnings' %}" class="nav-item">My Earnings</a>
+                <a href="{% url 'user_withdraw' %}" class="nav-item active">Withdraw</a>
+                <a href="{% url 'contact_admin' %}" class="nav-item">Contact Admin</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <strong>{{ user.get_full_name|default:user.username }}</strong>
+                    <span>Employee</span>
+                </div>
+                <button class="logout-btn" onclick="window.location.href='{% url 'logout' %}'">Log out</button>
+            </div>
+        </aside>
+
+        <main class="content-area">
+            <header class="section-header">
+                <h1>Withdraw via M-Pesa</h1>
+                <p>Request a withdrawal to your registered phone number</p>
+            </header>
+
+            <div class="balance-card">
+                <div class="balance-info">
+                    <span>Available Balance</span>
+                    <h2 id="displayBalance">KES {{ available_balance|default:0|floatformat:0 }}</h2>
+                </div>
+                <div class="withdraw-icon-container">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </div>
+            </div>
+
+            <div class="withdraw-container">
+                <div class="mpesa-header">
+                    <div class="mpesa-icon">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="#16a34a"><path d="M17 2H7c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H7V4h10v16z"/></svg>
+                    </div>
+                    <div class="mpesa-details">
+                        <strong>M-Pesa Withdrawal</strong>
+                        <span>Funds will be sent to: {{ user.phone_number|default:"+254700100001" }}</span>
+                    </div>
+                </div>
+
+                <form method="POST" action="{% url 'user_withdraw' %}" id="withdrawalForm">
+                    {% csrf_token %}
+                    
+                    <div class="amount-input-section">
+                        <label for="amount">Amount (KES)</label>
+                        <div class="input-box">
+                            <span>KES</span>
+                            <input type="number" name="amount" id="withdrawInput" placeholder="Enter amount" min="50" max="{{ available_balance|default:0 }}" required>
+                        </div>
+                        <p class="limit-label">Minimum: KES 50 • Maximum: <span id="maxLimit">KES {{ available_balance|default:0|floatformat:0 }}</span></p>
+                    </div>
+
+                    <div class="quick-select">
+                        <button type="button" onclick="setAmount(500)">KES 500</button>
+                        <button type="button" onclick="setAmount(1000)">KES 1000</button>
+                        <button type="button" onclick="setAmount(2000)">KES 2000</button>
+                        <button type="button" onclick="setAmount(5000)">KES 5000</button>
+                        <button type="button" class="max-btn" onclick="setMax()">Max</button>
+                    </div>
+
+                    <button type="submit" class="main-withdraw-btn" id="withdrawBtn">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                        Withdraw to M-Pesa
+                    </button>
+                </form>
+            </div>
+
+            <section class="history-table-section">
+                <h3>Withdrawal History</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Amount</th>
+                                <th>Receipt Number</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="withdrawHistory">
+                            {% for withdrawal in withdrawal_history %}
+                            <tr>
+                                <td>{{ withdrawal.created_at|date:"Y-m-d H:i" }}</td>
+                                <td>KES {{ withdrawal.amount|floatformat:0 }}</td>
+                                <td>{{ withdrawal.receipt_number|default:"--" }}</td>
+                                <td>
+                                    <span class="status-badge {{ withdrawal.status|lower }}">
+                                        {{ withdrawal.status|title }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 2rem;">
+                                    No withdrawal history found.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="{% static 'js/logout.js' %}"></script>
+    <script src="{% static 'js/userwithdraw.js' %}"></script>
+</body>
+</html>
+{% endblock %}

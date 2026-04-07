@@ -1,0 +1,95 @@
+{% extends "html/base.html" %}
+{% load static %}
+
+{% block title %}Contact Admin - Kazi Safi{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/contactadmin.css' %}">
+{% endblock %}
+
+{% block content %}
+<header class="section-header">
+    <div class="header-left">
+        <h1>Contact Admin</h1>
+        <p>Submit support tickets and get help</p>
+    </div>
+    <button class="new-ticket-btn" onclick="showTicketForm()">+ New Ticket</button>
+</header>
+
+<div class="status-overview">
+    <div class="status-card">
+        <h2 id="openCount">{{ open_tickets_count|default:0 }}</h2>
+        <span>Open Tickets</span>
+    </div>
+    <div class="status-card">
+        <h2 id="resolvedCount">{{ resolved_tickets_count|default:0 }}</h2>
+        <span>Resolved Tickets</span>
+    </div>
+</div>
+
+<div class="support-main-grid">
+    <div class="ticket-list-container">
+        <h3>My Tickets</h3>
+        <div id="ticketList" class="ticket-items-wrapper">
+            {% for ticket in tickets %}
+            <div class="ticket-item {% if ticket.status == 'open' %}active{% endif %}" onclick="showTicketDetail({{ ticket.id }})">
+                <div class="ticket-header">
+                    <span class="ticket-id">#{{ ticket.id }}</span>
+                    <span class="ticket-status {{ ticket.status }}">{{ ticket.status|title }}</span>
+                </div>
+                <div class="ticket-subject">{{ ticket.subject }}</div>
+                <div class="ticket-meta">
+                    <span class="ticket-category">{{ ticket.category }}</span>
+                    <span class="ticket-date">{{ ticket.created_at|date:"M d, Y" }}</span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-tickets">
+                <p>No tickets found. Create your first ticket!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="ticket-detail-view" id="detailView">
+        <div class="empty-state" id="emptyState">
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#9ca3af" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <p>Select a ticket to view details<br>or create a new one</p>
+        </div>
+
+        <div id="ticketDetailContent" style="display: none;"></div>
+
+        <div class="ticket-form" id="ticketForm" style="display: none;">
+            <h3>Create New Ticket</h3>
+            <form method="POST" action="{% url 'contact_admin' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Category</label>
+                    <select name="category" id="ticketCategory" required>
+                        <option value="salary">Salary Inquiry</option>
+                        <option value="attendance">Attendance Issue</option>
+                        <option value="technical">Technical Support</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" name="subject" placeholder="Brief description of your issue" required>
+                </div>
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea name="message" id="ticketMessage" placeholder="How can we help you?" required></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="cancel-btn" onclick="hideTicketForm()">Cancel</button>
+                    <button type="submit" class="send-btn">Submit Ticket</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/contactadmin.js' %}"></script>
+{% endblock %}

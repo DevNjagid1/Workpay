@@ -1,0 +1,137 @@
+{% load static %}
+
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/userearning.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 24 24" fill="white" width="24" height="24"><path d="M12 2L14.5 9H22L16 14L18.5 21L12 17L5.5 21L8 14L2 9H9.5L12 2Z"/></svg>
+                </div>
+                <div class="brand-text">
+                    <h3>Kazi Safi</h3>
+                    <p>Work-Pay System</p>
+                </div>
+            </div>
+            <nav class="menu">
+                <a href="{% url 'user_dashboard' %}" class="nav-item">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    Dashboard
+                </a>
+                <a href="{% url 'user_attendance' %}" class="nav-item">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Mark Attendance
+                </a>
+                <a href="{% url 'user_earnings' %}" class="nav-item active">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    My Earnings
+                </a>
+                <a href="{% url 'user_withdraw' %}" class="nav-item">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                    Withdraw
+                </a>
+                <a href="{% url 'contact_admin' %}" class="nav-item">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Contact Admin
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <strong>{{ user.get_full_name|default:user.username }}</strong>
+                    <span>Employee</span>
+                </div>
+                <button class="logout-btn" onclick="window.location.href='{% url 'logout' %}'">
+                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                    Log out
+                </button>
+            </div>
+        </aside>
+
+        <main class="content-area">
+            <header class="section-header">
+                <h1>My Earnings</h1>
+                <p>Track your earnings and balance</p>
+            </header>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Days Worked</div>
+                    <h2 id="daysWorked">{{ days_worked|default:0 }}</h2>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Daily Rate</div>
+                    <h2 id="dailyRate">KES {{ daily_rate|default:1500|floatformat:0 }}</h2>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Earned</div>
+                    <h2 id="totalEarned">KES {{ total_earned|default:0|floatformat:0 }}</h2>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Available Balance</div>
+                    <h2 id="availableBalance">KES {{ available_balance|default:0|floatformat:0 }}</h2>
+                </div>
+            </div>
+
+            <div class="calculation-card">
+                <div class="card-title">Earnings Calculation</div>
+                <div class="formula-box" id="formulaText">
+                    Earnings = {{ days_worked|default:0 }} days × KES {{ daily_rate|default:1500|floatformat:0 }} = KES {{ total_earned|default:0|floatformat:0 }}
+                </div>
+                <div class="calc-grid">
+                    <div class="calc-item">
+                        <span>Gross Earnings</span>
+                        <strong id="calcTotal" class="text-green">KES {{ total_earned|default:0|floatformat:0 }}</strong>
+                    </div>
+                    <div class="calc-item">
+                        <span>Already Withdrawn</span>
+                        <strong id="calcWithdrawn" class="text-red">- KES {{ total_withdrawn|default:0|floatformat:0 }}</strong>
+                    </div>
+                    <div class="calc-item">
+                        <span>Available Balance</span>
+                        <strong id="calcBalance" class="text-primary">= KES {{ available_balance|default:0|floatformat:0 }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="history-section">
+                <h3>Approved Work Days</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Day</th>
+                                <th>Overtime (Hrs)</th>
+                                <th>Total Day Pay</th>
+                            </tr>
+                        </thead>
+                        <tbody id="earningsBody">
+                            {% for earning in approved_earnings %}
+                            <tr>
+                                <td>{{ earning.date|date:"Y-m-d" }}</td>
+                                <td>{{ earning.date|date:"l" }}</td>
+                                <td>{{ earning.overtime_hours|default:0 }}</td>
+                                <td>KES {{ earning.day_pay|floatformat:0 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 2rem;">
+                                    No approved work days found.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="{% static 'js/logout.js' %}"></script>
+    <script src="{% static 'js/userearning.js' %}"></script>
+</body>
+</html>
+{% endblock %}  

@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Kazi Safi - Work-Pay System{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/user.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 24 24" fill="white" width="24" height="24"><path d="M12 2L14.5 9H22L16 14L18.5 21L12 17L5.5 21L8 14L2 9H9.5L12 2Z"/></svg>
+                </div>
+                <div class="brand-text">
+                    <h3>Kazi Safi</h3>
+                    <p>Work-Pay System</p>
+                </div>
+            </div>
+            <nav class="menu">
+                <a href="{% url 'user_dashboard' %}" class="nav-item">Dashboard</a>
+                <a href="{% url 'user_attendance' %}" class="nav-item">Attendance</a>
+                <a href="{% url 'user_earnings' %}" class="nav-item">Earnings</a>
+                <a href="{% url 'user_withdraw' %}" class="nav-item">Withdraw</a>
+                <a href="{% url 'contact_admin' %}" class="nav-item">Contact Admin</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info"><strong>{{ user.get_full_name|default:user.username }}</strong><span>Employee</span></div>
+                <a href="{% url 'logout' %}" class="logout-btn">Log out</a>
+            </div>
+        </aside>
+
+        <main class="content-area">
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

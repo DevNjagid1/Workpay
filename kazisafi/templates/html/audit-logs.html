@@ -1,0 +1,71 @@
+
+     {% extends "html/base.html" %}
+            {% load static %}
+
+            {% block title %}Kazi Safi - Audit Logs{% endblock %}
+
+            {% block extra_css %}
+            <link rel="stylesheet" href="{% static 'css/audit.css' %}">
+            {% endblock %}        
+            {% block content %}
+
+        <main class="content-area">
+           
+
+            <header class="section-header">
+                <h1>Audit Logs</h1>
+                <p>View all system activities and user actions</p>
+            </header>
+
+            <div class="log-controls">
+                <div class="search-box">
+                    <input type="text" id="logSearch" placeholder="Search logs...">
+                </div>
+                <div class="filter-box">
+                    <select id="actionFilter">
+                        <option value="all">All Actions</option>
+                        <option value="login">Login/Logout</option>
+                        <option value="withdrawal">Withdrawals</option>
+                        <option value="attendance">Attendance</option>
+                        <option value="support">Support</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>User</th>
+                            <th>Action</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logBody">
+                        {% for log in audit_logs %}
+                        <tr>
+                            <td>{{ log.timestamp|date:"Y-m-d H:i:s" }}</td>
+                            <td>{{ log.user.username }}</td>
+                            <td>{{ log.action }}</td>
+                            <td>{{ log.details }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4">No audit logs found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p class="audit-footer-note">Note: Audit logs are read-only and cannot be modified or deleted. All system activities are recorded for security and compliance purposes.</p>
+            {% endblock %}
+
+            {% block extra_js %}
+            <script src="{% static 'js/audit.js' %}"></script>
+            {% endblock %}
+        </main>
+    </div>
+    <script src="../js/logout.js"></script>
+</body>
+</html>

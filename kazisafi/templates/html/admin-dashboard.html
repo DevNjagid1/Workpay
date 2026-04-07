@@ -1,0 +1,105 @@
+{% extends "html/base.html" %}
+{% load static %}
+ 
+{% block title %}Admin Dashboard{% endblock %}
+ 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin.css' %}">
+{% endblock %}
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <strong>{{ user.get_full_name }}</strong>
+                    <span>Admin</span>
+                </div>
+                <button id="logoutBtn" class="logout-link">Log out</button>
+            </div>
+        </aside>
+
+        <main class="content-area">
+            {% block content %}
+            <header class="main-header">
+                <h1>Dashboard</h1>
+                <p>Welcome back! Here's what's happening today.</p>
+            </header>
+
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="icon-circle">E</div>
+                    <div class="stat-label">Total Employees</div>
+                    <div class="stat-value">{{ total_employees|default:0 }}</div>
+                    <div class="stat-sub">Active staff members</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-circle orange">A</div>
+                    <div class="stat-label">Pending Attendance</div>
+                    <div class="stat-value">{{ pending_attendance|default:0 }}</div>
+                    <div class="stat-sub">Awaiting approval</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-circle green">P</div>
+                    <div class="stat-label">Total Payroll</div>
+                    <div class="stat-value">KES {{ total_payroll|default:0|floatformat:0 }}</div>
+                    <div class="stat-sub">Total earned by employees</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-circle gray">W</div>
+                    <div class="stat-label">Total Withdrawals</div>
+                    <div class="stat-value">KES {{ total_withdrawals|default:0|floatformat:0 }}</div>
+                    <div class="stat-sub">Paid via M-Pesa</div>
+                </div>
+            </section>
+
+            <section class="details-grid">
+                <div class="data-box">
+                    <div class="box-header">
+                        <h3>Pending Approvals</h3>
+                        <a href="{% url 'admin_attendance' %}" class="view-all">View all</a>
+                    </div>
+                    {% for attendance in pending_attendances %}
+                    <div class="list-item">
+                        <div class="item-info">
+                            <strong>{{ attendance.employee.get_full_name }}</strong>
+                            <span>{{ attendance.date|date:"Y-m-d" }} at {{ attendance.check_in|date:"H:i" }}</span>
+                        </div>
+                        <span class="status-tag">Pending</span>
+                    </div>
+                    {% empty %}
+                    <div class="list-item">
+                        <div class="item-info">
+                            <span>No pending approvals</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="data-box">
+                    <div class="box-header">
+                        <h3>Recent Activity</h3>
+                    </div>
+                    {% for activity in recent_activities %}
+                    <div class="activity-item">
+                        <div class="dot {{ activity.type|lower }}"></div>
+                        <div class="activity-text">
+                            <strong>{{ activity.action }}</strong>
+                            <span>{{ activity.user.username }} • {{ activity.timestamp|date:"M d, H:i" }}</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="activity-item">
+                        <div class="activity-text">
+                            <span>No recent activity</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endblock %}
+        </main>
+    </div>
+    {% block extra_js %}
+    <script src="{% static 'js/logout.js' %}"></script>
+    <script src="{% static 'js/admin.js' %}"></script>
+    {% endblock %}
+</body>
+</html>

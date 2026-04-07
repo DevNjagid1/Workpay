@@ -1,0 +1,45 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Kazi Safi - Work-Pay System{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/audit.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 24 24" fill="white" width="24" height="24"><path d="M12 2L14.5 9H22L16 14L18.5 21L12 17L5.5 21L8 14L2 9H9.5L12 2Z"/></svg>
+                </div>
+                <div class="brand-text">
+                    <h3>Kazi Safi</h3>
+                    <p>Work-Pay System</p>
+                </div>
+            </div>
+            <nav class="menu">
+                <a href="{% url 'admin_dashboard' %}" class="nav-item">Dashboard</a>
+                <a href="{% url 'manage_employees' %}" class="nav-item">Employees</a>
+                <a href="{% url 'admin_attendance' %}" class="nav-item">Attendance</a>
+                <a href="{% url 'payroll' %}" class="nav-item">Payroll</a>
+                <a href="{% url 'support_inbox' %}" class="nav-item">Support Inbox</a>
+                <a href="{% url 'audit_logs' %}" class="nav-item">Audit Logs</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info"><strong>{{ user.get_full_name|default:user.username }}</strong><span>Administrator</span></div>
+                <button class="logout-btn" onclick="window.location.href='{% url 'logout' %}'">Log out</button>
+            </div>
+        </aside>
+
+        <main class="content-area">
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

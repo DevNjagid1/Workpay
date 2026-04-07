@@ -1,0 +1,102 @@
+:root {
+    --primary: #2d7a5e;
+    --primary-dark: #235e49;
+    --bg: #f4f7f6;
+    --text: #333;
+    --muted: #666;
+    --border: #ddd;
+    --white: #fff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.logo-box {
+    background: var(--primary);
+    width: 45px;
+    height: 45px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 15px;
+}
+
+header h1 { font-size: 24px; font-weight: 700; }
+.subtitle { font-size: 13px; color: var(--muted); }
+
+.auth-card {
+    background: var(--white);
+    padding: 35px 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+}
+
+.auth-card h2 {
+    font-size: 18px;
+    margin-bottom: 25px;
+    font-weight: 600;
+}
+
+.form-group { margin-bottom: 18px; }
+label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+
+input, select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: 0.2s;
+}
+
+input:focus, select:focus {
+    border-color: var(--primary);
+}
+
+.forgot-link { text-align: right; margin-top: 6px; }
+.forgot-link a { font-size: 12px; color: var(--muted); text-decoration: none; }
+
+.auth-btn {
+    width: 100%;
+    background: var(--primary);
+    color: var(--white);
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.auth-btn:hover { background: var(--primary-dark); }
+.auth-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+.toggle-view { margin-top: 20px; text-align: center; font-size: 13px; }
+.toggle-view a { color: var(--primary); text-decoration: none; font-weight: 600; }
