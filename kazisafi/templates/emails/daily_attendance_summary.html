@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Attendance Summary</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #4f46e5; color: white; padding: 20px; text-align: center; }
+        .content { padding: 30px 20px; background: #f9fafb; }
+        .info-box { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+        .attendance-item { border-bottom: 1px solid #e5e7eb; padding: 10px 0; }
+        .attendance-item:last-child { border-bottom: none; }
+        .status { padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .status.pending { background: #fef3c7; color: #92400e; }
+        .btn { display: inline-block; padding: 12px 24px; background: #4f46e5; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Daily Attendance Summary</h1>
+            <p>{{ total_pending }} attendance records need your approval</p>
+        </div>
+        
+        <div class="content">
+            <div class="info-box">
+                <h3>📋 Pending Attendance</h3>
+                {% for attendance in pending_attendance %}
+                <div class="attendance-item">
+                    <p><strong>{{ attendance.employee.get_full_name|default:attendance.employee.username }}</strong> - {{ attendance.date }}</p>
+                    <p>Check-in: {{ attendance.check_in|time:"H:i" }} | Status: <span class="status pending">{{ attendance.status|title }}</span></p>
+                </div>
+                {% empty %}
+                <p>No pending attendance records found.</p>
+                {% endfor %}
+            </div>
+            
+            <div class="info-box">
+                <h3>📈 Summary</h3>
+                <p><strong>Total Pending:</strong> {{ total_pending }} records</p>
+                <p><strong>Date:</strong> {{ date|date:"F d, Y" }}</p>
+                <p><strong>Time:</strong> {% now "H:i" %}</p>
+            </div>
+            
+            <div class="info-box">
+                <h3>🔗 Quick Actions</h3>
+                <a href="http://127.0.0.1:8000/admin/attendance/" class="btn">Review All Attendance</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Kazi Safi Attendance Management System</p>
+            <p>This is an automated daily summary. Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

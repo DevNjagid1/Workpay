@@ -1,137 +1,136 @@
-// Remove hardcoded employees - data will come from Django template
+// attendance.js — Admin attendance management
+// Requires api.js to be loaded first (window.API must exist)
 
 function calculateOvertime(checkInStr, checkOutStr) {
-    const [inH, inM] = checkInStr.split(':').map(Number);
+    const [inH,  inM]  = checkInStr.split(':').map(Number);
     const [outH, outM] = checkOutStr.split(':').map(Number);
-    const eightAmMinutes = 8 * 60;
-    const fourPmMinutes = 16 * 60;
-    const checkInTotalMinutes = inH * 60 + inM;
-    const checkOutTotalMinutes = outH * 60 + outM;
-
-    const lateness = Math.max(0, checkInTotalMinutes - eightAmMinutes);
-    const potentialOT = Math.max(0, checkOutTotalMinutes - fourPmMinutes);
-    const netOT = Math.max(0, potentialOT - lateness);
-    
-    return (netOT / 60).toFixed(1);
+    const eightAm = 8 * 60, fourPm = 16 * 60;
+    const checkIn  = inH  * 60 + inM;
+    const checkOut = outH * 60 + outM;
+    const lateness   = Math.max(0, checkIn  - eightAm);
+    const potentialOT = Math.max(0, checkOut - fourPm);
+    return ((Math.max(0, potentialOT - lateness)) / 60).toFixed(1);
 }
 
-function updateStatus(id, newStatus) {
-    // This will be handled by Django view, not JavaScript
-    console.log(`Update status for ${id} to ${newStatus}`);
-}
-
+// ── Approve ───────────────────────────────────────────────────────────────────
 async function approveAttendance(id) {
+    const btn = document.querySelector(`tr[data-id="${id}"] .approve-btn`);
+    if (btn) { btn.disabled = true; btn.textContent = 'Approving…'; }
+
     try {
-        const response = await API.call('/api/approve-attendance/', {
+        const response = await window.API.call('/api/approve-attendance/', {
             method: 'POST',
-            body: JSON.stringify({ attendance_id: id })
+            body: JSON.stringify({ attendance_id: id })   // ✅ JSON body
         });
-        
+
         if (response.status === 'success') {
-            API.showNotification('Attendance approved successfully!', 'success');
-            updatePendingBanner(getCurrentAttendanceData());
+            window.API.showNotification('Attendance approved successfully!', 'success');
             updateAttendanceRow(id, 'approved', response.data);
+            refreshPendingBanner();
         } else {
-            API.showNotification(response.message || 'Failed to approve attendance', 'error');
+            window.API.showNotification(response.message || 'Failed to approve attendance', 'error');
+            if (btn) { btn.disabled = false; btn.textContent = 'Approve'; }
         }
     } catch (error) {
-        API.showNotification('Error approving attendance', 'error');
+        window.API.showNotification('Error approving attendance', 'error');
         console.error('Approval error:', error);
+        if (btn) { btn.disabled = false; btn.textContent = 'Approve'; }
     }
 }
 
+// ── Reject ────────────────────────────────────────────────────────────────────
 async function rejectAttendance(id) {
+    if (!confirm('Are you sure you want to reject this attendance record?')) return;
+
+    const btn = document.querySelector(`tr[data-id="${id}"] .reject-btn`);
+    if (btn) { btn.disabled = true; btn.textContent = 'Rejecting…'; }
+
     try {
-        const response = await API.call('/api/reject-attendance/', {
+        const response = await window.API.call('/api/reject-attendance/', {
             method: 'POST',
-            body: JSON.stringify({ attendance_id: id })
+            body: JSON.stringify({ attendance_id: id })   // ✅ JSON body
         });
-        
+
         if (response.status === 'success') {
-            API.showNotification('Attendance rejected successfully!', 'success');
-            updatePendingBanner(getCurrentAttendanceData());
-            updateAttendanceRow(id, 'rejected');
+            window.API.showNotification('Attendance rejected successfully!', 'success');
+            updateAttendanceRow(id, 'rejected', null);
+            refreshPendingBanner();
         } else {
-            API.showNotification(response.message || 'Failed to reject attendance', 'error');
+            window.API.showNotification(response.message || 'Failed to reject attendance', 'error');
+            if (btn) { btn.disabled = false; btn.textContent = 'Reject'; }
         }
     } catch (error) {
-        API.showNotification('Error rejecting attendance', 'error');
+        window.API.showNotification('Error rejecting attendance', 'error');
         console.error('Rejection error:', error);
+        if (btn) { btn.disabled = false; btn.textContent = 'Reject'; }
     }
 }
 
+// ── DOM helpers ───────────────────────────────────────────────────────────────
 function updateAttendanceRow(id, status, data) {
     const row = document.querySelector(`tr[data-id="${id}"]`);
-    if (row) {
-        const statusCell = row.querySelector('.status-pill');
-        const actionCell = row.querySelector('.action-cell');
-        
-        if (statusCell) {
-            statusCell.className = `status-pill ${status}`;
-            statusCell.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-        }
-        
-        if (actionCell && data) {
+    if (!row) return;
+
+    // Update status pill
+    const pill = row.querySelector('.status-pill');
+    if (pill) {
+        pill.className = `status-pill ${status}`;
+        pill.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+    }
+
+    // Update data-status so the banner counter stays accurate
+    row.dataset.status = status;
+
+    // Replace action buttons with earnings summary (approved) or a note (rejected)
+    const actionCell = row.querySelector('.action-cell');
+    if (actionCell) {
+        if (status === 'approved' && data) {
             actionCell.innerHTML = `
                 <div class="earnings-details">
-                    <small>Work: ${data.work_hours}h | Regular: ${data.regular_hours}h | OT: ${data.overtime_hours}h</small><br>
-                    <small>Pay: KES ${data.total_pay} (Regular: KES ${data.regular_pay} + OT: KES ${data.overtime_pay})</small>
-                </div>
-            `;
+                    <small>⏱ ${data.work_hours}h worked &nbsp;|&nbsp; OT: ${data.overtime_hours}h</small><br>
+                    <small>💰 KES ${data.total_pay.toLocaleString()} (reg: ${data.regular_pay.toLocaleString()} + OT: ${data.overtime_pay.toLocaleString()})</small>
+                </div>`;
+        } else if (status === 'rejected') {
+            actionCell.innerHTML = `<span class="text-muted" style="font-size:.85rem;">Rejected</span>`;
         }
     }
 }
 
-function getCurrentAttendanceData() {
-    // Get current attendance data from the table
-    const rows = document.querySelectorAll('#attendanceBody tr');
-    return Array.from(rows).map(row => ({
-        id: row.dataset.id,
-        status: row.dataset.status
-    }));
-}
+function refreshPendingBanner() {
+    const rows = document.querySelectorAll('#attendanceBody tr[data-id]');
+    const pendingCount = Array.from(rows).filter(r => r.dataset.status === 'pending').length;
 
-function updatePendingBanner(data) {
-    const pendingCount = data.filter(r => r.status === 'pending').length;
     const banner = document.getElementById('adminAlert');
-    const text = document.getElementById('pendingCountText');
-    
+    const text   = document.getElementById('pendingCountText');
+    if (!banner) return;
+
     if (pendingCount > 0) {
         banner.style.display = 'flex';
-        text.innerText = `${pendingCount} pending attendance records`;
+        if (text) text.innerText = `${pendingCount} pending attendance record${pendingCount !== 1 ? 's' : ''}`;
     } else {
         banner.style.display = 'none';
     }
 }
 
-function renderTable() {
-    // Table is rendered by Django template, no JavaScript rendering needed
-    console.log('Table rendered by Django template');
-}
-
-function viewDetails(id) {
-    // Show attendance details modal or redirect to details page
-    console.log(`View details for attendance ID: ${id}`);
-    // For now, just show a simple alert
-    alert(`Viewing details for attendance record ${id}`);
-}
-
-function manageActiveLink() {
-    const currentPath = window.location.pathname.split("/").pop();
-    const navLinks = document.querySelectorAll('.nav-item');
-
-    navLinks.forEach(link => {
-        const linkPath = link.getAttribute('href');
-        
-        if (currentPath === linkPath) {
-            link.classList.add('active');
-        } else {
-            link.classList.remove('active');
-        }
+function filterTable(status) {
+    document.querySelectorAll('#attendanceBody tr[data-id]').forEach(row => {
+        row.style.display = (status === 'all' || row.dataset.status === status) ? '' : 'none';
     });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    renderTable();
+function manageActiveLink() {
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.nav-item').forEach(link => {
+        const href = link.getAttribute('href') || '';
+        link.classList.toggle('active', currentPath.endsWith(href) && href !== '');
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof window.API === 'undefined') {
+        console.error('[attendance.js] window.API not found — load api.js first.');
+        return;
+    }
+    refreshPendingBanner();
     manageActiveLink();
 });

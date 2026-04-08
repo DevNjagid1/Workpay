@@ -1,31 +1,14 @@
-// Remove hardcoded audit logs - data will come from Django template
+// audit.js — client-side search and filter
+// Real-time filtering runs on the Django-rendered rows.
+// The filterLogs() function is also defined inline in the template
+// so it can be called by oninput/onchange attributes.
+// This file is kept for any future extensions.
 
-function renderLogs(filterText = '', typeFilter = 'all') {
-    // Audit logs are rendered by Django template, no JavaScript rendering needed
-    console.log('Audit logs rendered by Django template');
-}
-
-function filterLogs() {
-    // This will be handled by Django view, not JavaScript
-    console.log('Filter logs handled by Django view');
-}
-
-function manageActiveLink() {
-    const currentPath = window.location.pathname.split("/").pop();
-    const navLinks = document.querySelectorAll('.nav-item');
-
-    navLinks.forEach(link => {
-        const linkPath = link.getAttribute('href');
-        
-        if (currentPath === linkPath) {
-            link.classList.add('active');
-        } else {
-            link.classList.remove('active');
-        }
+document.addEventListener('DOMContentLoaded', function () {
+    // Active nav link
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.nav-item').forEach(link => {
+        const href = link.getAttribute('href') || '';
+        link.classList.toggle('active', href !== '' && currentPath.includes(href));
     });
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    renderLogs();
-    manageActiveLink();
 });

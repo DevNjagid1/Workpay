@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -123,7 +128,40 @@ TIME_ZONE = "UTC"
 
 USE_I18N = True
 
+# Authentication settings
+LOGIN_URL = '/'
+LOGIN_REDIRECT_URL = '/admin/'
+LOGOUT_REDIRECT_URL = '/'
+
 USE_TZ = True
+
+# Email Configuration
+# For development - prints to console
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# For production - uncomment these lines and configure your SMTP
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'vivianmukhongo72@gmail.com')
+# EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'your-16-character-app-password')
+# DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'vivianmukhongo72@gmail.com')
+
+# Alternative SMTP providers:
+# Outlook/Hotmail:
+# EMAIL_HOST = 'smtp-mail.outlook.com'
+# EMAIL_PORT = 587
+
+# SendGrid:
+# EMAIL_HOST = 'smtp.sendgrid.net'
+# EMAIL_PORT = 587
+# EMAIL_HOST_USER = 'apikey'
+# EMAIL_HOST_PASSWORD = 'your-sendgrid-api-key'
+
+# Admin notification settings
+ADMINS = [('Kazi Safi Admin', os.getenv('NOTIFICATION_EMAIL', 'vivianmukhongo72@gmail.com'))]
+NOTIFICATION_EMAIL = os.getenv('NOTIFICATION_EMAIL', 'vivianmukhongo72@gmail.com')  # Email for attendance notifications
 
 
 # Static files (CSS, JavaScript, Images)

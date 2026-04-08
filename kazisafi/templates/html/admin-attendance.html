@@ -1,97 +1,124 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {% extends "html/base.html" %}
-    {% load static %}
-    {% block title %}Kazi Safi - Attendance Management{% endblock %}
-    {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/attendance.css' %}">
-    {% endblock %}
+{% extends "html/base.html" %}
+{% load static %}
 
-            {% block content %}
-            <header class="section-header">
-                <h1>Attendance Management</h1>
-                <p>Review hours (Overtime compensates for lateness; starts after 4:00 PM)</p>
-            </header>
+{% block title %}Kazi Safi - Attendance Management{% endblock %}
 
-            <div class="alert-banner" id="adminAlert">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                <span id="pendingCountText">{{ pending_count|default:0 }} pending attendance records</span>
-            </div>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/attendance.css' %}">
+{% endblock %}
 
-            <div class="filter-bar">
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="pending">Pending</button>
-                <button class="filter-btn" data-filter="approved">Approved</button>
-                <button class="filter-btn" data-filter="rejected">Rejected</button>
-            </div>
+{% block content %}
+<header class="section-header">
+    <h1>Attendance Management</h1>
+    <p>Review hours (Overtime compensates for lateness; starts after 4:00 PM)</p>
+</header>
 
-            <div class="table-container">
-                <table id="attendanceTable">
-                    <thead>
-                        <tr>
-                            <th>Employee</th>
-                            <th>Date</th>
-                            <th>Check-in</th>
-                            <th>Check-out</th>
-                            <th>Net Overtime</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="attendanceBody">
-                        {% for attendance in attendances %}
-                        <tr data-id="{{ attendance.id }}" data-status="{{ attendance.status|lower }}">
-                            <td>{{ attendance.employee.get_full_name }}</td>
-                            <td>{{ attendance.date|date:"Y-m-d" }}</td>
-                            <td>{{ attendance.check_in|date:"H:i" }}</td>
-                            <td>{{ attendance.check_out|date:"H:i"|default:"--" }}</td>
-                            <td>
-                                {% if attendance.check_in and attendance.check_out %}
-                                    {% with work_hours=attendance.check_out|timeuntil:attendance.check_in %}
-                                        {{ work_hours|date:"H:i" }} 
-                                    {% endwith %}
-                                {% else %}
-                                    --
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span class="status-badge {{ attendance.status|lower }}">
-                                    {{ attendance.status|title }}
-                                </span>
-                            </td>
-                            <td class="action-cell">
-                                {% if attendance.status == 'pending' %}
-                                    <button class="btn approve-btn" onclick="approveAttendance('{{ attendance.id }}')">Approve</button>
-                                    <button class="btn reject-btn" onclick="rejectAttendance('{{ attendance.id }}')">Reject</button>
-                                {% elif attendance.status == 'approved' %}
-                                    <div class="earnings-summary">
-                                        {% if attendance.earning.overtime_hours > 0 %}
-                                            <small>{{ attendance.earning.day_pay|floatformat:0 }} ({{ attendance.earning.overtime_hours|floatformat:1 }}h OT)</small>
-                                        {% else %}
-                                            <small>{{ attendance.earning.day_pay|floatformat:0 }}</small>
-                                        {% endif %}
-                                    </div>
-                                {% endif %}
-                                <button class="btn view-btn" onclick="viewDetails('{{ attendance.id }}')">View</button>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="7" style="text-align: center; padding: 2rem;">No attendance records found.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% endblock %}
-        </main>
-    </div>
-    <script src="../js/logout.js"></script>
-    {% block extra_js %}
-    <script src="{% static 'js/attendance.js' %}"></script>
-    {% endblock %}
-</body>
-</html>
+{% if pending_count %}
+<div class="alert-banner" id="adminAlert">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    <span id="pendingCountText">{{ pending_count }} pending attendance record{{ pending_count|pluralize }} to review</span>
+</div>
+{% else %}
+<div class="alert-banner" id="adminAlert" style="display:none;">
+    <span id="pendingCountText">0 pending attendance records</span>
+</div>
+{% endif %}
+
+<div class="filter-bar">
+    <button class="filter-btn active" onclick="filterTable('all')">All</button>
+    <button class="filter-btn" onclick="filterTable('pending')">Pending</button>
+    <button class="filter-btn" onclick="filterTable('approved')">Approved</button>
+    <button class="filter-btn" onclick="filterTable('rejected')">Rejected</button>
+</div>
+
+<div class="table-container">
+    <table id="attendanceTable">
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Date</th>
+                <th>Check-in</th>
+                <th>Check-out</th>
+                <th>Net Overtime</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="attendanceBody">
+            {% for attendance in attendances %}
+            <tr data-id="{{ attendance.id }}" data-status="{{ attendance.status|lower }}"
+                data-checkin="{{ attendance.check_in|date:'H:i'|default:'' }}"
+                data-checkout="{{ attendance.check_out|date:'H:i'|default:'' }}">
+                <td>{{ attendance.employee.get_full_name }}</td>
+                <td>{{ attendance.date|date:"Y-m-d" }}</td>
+                <td>{{ attendance.check_in|date:"H:i"|default:"--" }}</td>
+                <td>{{ attendance.check_out|date:"H:i"|default:"--" }}</td>
+                <td class="overtime-cell">
+                    {% if attendance.check_in and attendance.check_out %}
+                        <span class="ot-calculated"></span>
+                    {% else %}
+                        --
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="status-pill {{ attendance.status|lower }}">
+                        {{ attendance.status|title }}
+                    </span>
+                </td>
+                <td class="action-cell">
+                    {% if attendance.status == 'pending' %}
+                        <button class="btn approve-btn" onclick="approveAttendance('{{ attendance.id }}')">Approve</button>
+                        <button class="btn reject-btn" onclick="rejectAttendance('{{ attendance.id }}')">Reject</button>
+                    {% elif attendance.status == 'approved' %}
+                        <div class="earnings-summary">
+                            {% if attendance.earning.overtime_hours > 0 %}
+                                <small>KES {{ attendance.earning.day_pay|floatformat:0 }} ({{ attendance.earning.overtime_hours|floatformat:1 }}h OT)</small>
+                            {% else %}
+                                <small>KES {{ attendance.earning.day_pay|floatformat:0 }}</small>
+                            {% endif %}
+                        </div>
+                    {% elif attendance.status == 'rejected' %}
+                        <span class="text-muted" style="font-size:.85rem;">Rejected</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align:center;padding:2rem;">No attendance records found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/api.js' %}"></script>
+<script src="{% static 'js/attendance.js' %}"></script>
+<script>
+// Calculate overtime from data attributes on page load
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('#attendanceBody tr[data-id]').forEach(row => {
+        const ci = row.dataset.checkin;
+        const co = row.dataset.checkout;
+        const cell = row.querySelector('.ot-calculated');
+        if (cell && ci && co) {
+            const ot = calculateOvertime(ci, co);
+            cell.textContent = parseFloat(ot) > 0 ? `${ot} hrs` : 'None';
+            if (parseFloat(ot) > 0) cell.style.color = '#16a34a';
+        }
+    });
+
+    // Wire filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            filterTable(this.textContent.trim().toLowerCase());
+        });
+    });
+});
+</script>
+{% endblock %}
